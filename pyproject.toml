@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=45", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dts-merge"
+dynamic = ["version"]
+description = "Interactive merge of a generated FPGA-fabric DTS fragment into an HPS/kernel devicetree"
+readme = "README.md"
+license = { file = "COPYING" }
+requires-python = ">=3.10"
+authors = [
+    { name = "Laurence", email = "laurence@anodes4life.com" },
+]
+keywords = ["fpga", "altera", "intel", "devicetree", "dts", "socfpga", "agilex", "merge"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Embedded Systems",
+]
+dependencies = [
+    "sopc2dts @ git+https://github.com/LaurenceA4L/sopc2dts.git",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "ruff>=0.4",
+]
+
+[project.scripts]
+dts-merge = "dts_merge.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/LaurenceA4L/dts-merge"
+"Bug Tracker" = "https://github.com/LaurenceA4L/dts-merge/issues"
+"Buy Me a Coffee" = "https://buymeacoffee.com/lozhoma"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["dts_merge*"]
+
+[tool.setuptools_scm]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
