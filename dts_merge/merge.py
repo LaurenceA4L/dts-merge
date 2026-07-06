@@ -59,6 +59,12 @@ class Conflict:
     fpga_prop: Optional[DTProperty] = None
     resolution: Optional[Resolution] = None
     replacement: Optional[object] = None  # DTNode or DTProperty, only set for EDIT
+    # For DUPLICATE_LABEL specifically: the two colliding nodes normally live
+    # at *different* paths (that's the whole problem) — ``path`` alone can't
+    # show that, so these carry each side's real path for display.
+    base_path: Optional[str] = None
+    fpga_path: Optional[str] = None
+    label: Optional[str] = None
 
     @property
     def resolved(self) -> bool:
@@ -192,13 +198,19 @@ def merge_trees(
                 path=child_path,
                 base_node=dup_path_node,
                 fpga_node=fpga_child,
+                base_path=child_path,
+                fpga_path=child_path,
             ))
         elif dup_label_node is not None:
+            base_node_path = next((p for p, n in by_path.items() if n is dup_label_node), child_path)
             conflicts.append(Conflict(
                 kind=ConflictKind.DUPLICATE_LABEL,
                 path=child_path,
                 base_node=dup_label_node,
                 fpga_node=fpga_child,
+                base_path=base_node_path,
+                fpga_path=child_path,
+                label=fpga_child.label,
             ))
         else:
             base_anchor.add_child(fpga_child)

@@ -301,10 +301,22 @@ class _Parser:
 
         nxt = self.peek().kind
         if nxt == "{":
-            child = DTNode(name, label=label)
-            self._parse_node_body(child)
-            self.expect(";")
-            parent.add_child(child)
+            # Reopening an already-existing sibling by plain name (no label
+            # needed) is standard dtc composition — e.g. a BSP dtsi doing
+            # `/{ soc { new_peripheral { ... }; }; };` to add nodes under the
+            # kernel's existing `/soc` without referencing its label. Merge
+            # into it rather than creating a colliding duplicate.
+            existing = next((c for c in parent.children if c.name == name), None)
+            if existing is not None:
+                if label and not existing.label:
+                    existing.label = label
+                self._parse_node_body(existing)
+                self.expect(";")
+            else:
+                child = DTNode(name, label=label)
+                self._parse_node_body(child)
+                self.expect(";")
+                parent.add_child(child)
         elif nxt == "=":
             self.advance()
             prop = DTProperty(name, label=label)

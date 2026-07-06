@@ -154,3 +154,42 @@ def test_unresolved_property_lists_before_resolution():
     assert len(result.unresolved) == len(result.conflicts)
     result.resolve(0, Resolution.BASE)
     assert len(result.unresolved) == len(result.conflicts) - 1
+
+
+def test_duplicate_label_conflict_records_both_real_paths():
+    """
+    Same label, different unit addresses — the real led_pio scenario. Unlike
+    DUPLICATE_PATH (where both sides are, by definition, at the same path),
+    a DUPLICATE_LABEL conflict's two colliding nodes normally live at
+    genuinely different addresses, so callers need both paths (and the
+    shared label) to render something a human can act on.
+    """
+    hps = _parse("""
+        / {
+            soc0: soc {
+                led_pio: gpio@f9001080 {
+                    compatible = "altr,pio-1.0";
+                };
+            };
+        };
+    """)
+    fpga = _parse("""
+        / {
+            sopc0: sopc@0 {
+                led_pio: gpio@1000 {
+                    compatible = "altr,pio-19.2.4";
+                };
+            };
+        };
+    """)
+    result = merge_trees(
+        hps.root, fpga.root,
+        base_anchor_label="soc0",
+        fpga_anchor_label="sopc0",
+    )
+    assert len(result.conflicts) == 1
+    c = result.conflicts[0]
+    assert c.kind == ConflictKind.DUPLICATE_LABEL
+    assert c.label == "led_pio"
+    assert c.base_path == "/soc/gpio@f9001080"
+    assert c.fpga_path == "/soc/gpio@1000"

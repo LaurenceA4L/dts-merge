@@ -3,6 +3,8 @@
  * Copyright (C) 2019, Intel Corporation
  */
 #include "socfpga_agilex.dtsi"
+#include "socfpga_agilex7_ghrd.dtsi"
+#include "socfpga_ilc.dtsi"
 
 / {
 	model = "SoCFPGA Agilex SoCDK";
